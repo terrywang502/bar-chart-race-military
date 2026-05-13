@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Military Spending Forecast 2026-2030</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#0d0d0d;font-family:Georgia,serif;color:#E8E4DC;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 24px;}
+  .card{background:white;border:0.5px solid #2a2a2a;border-radius:12px;padding:36px 40px;width:100%;max-width:980px;}
+  .header{margin-bottom:20px;}
+  .header h1{font-size:18px;font-weight:normal;letter-spacing:0.04em;color:black;margin-bottom:6px;}
+  .header p{font-size:12px;color:black;font-family:'Courier New',monospace;}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
+  .btn{padding:5px 14px;border-radius:20px;border:0.5px solid #2a2a2a;background:white;color:black;font-size:11px;font-family:'Courier New',monospace;cursor:pointer;transition:all 0.15s;}
+  .btn:hover,.btn.active{background:#f0f0f0;color:black;border-color:#555;}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:16px;font-size:11px;color:black;font-family:'Courier New',monospace;}
+  .legend-item{display:flex;align-items:center;gap:5px;}
+  .legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .chart-wrap{position:relative;width:100%;height:400px;}
+  .table-wrap{overflow-x:auto;margin-top:24px;}
+  table{width:100%;border-collapse:collapse;font-size:11px;font-family:'Courier New',monospace;}
+  th{padding:8px 12px;text-align:right;color:black;border-bottom:0.5px solid #2a2a2a;font-weight:normal;}
+  th:first-child{text-align:left;}
+  td{padding:7px 12px;text-align:right;color:black;border-bottom:0.5px solid #e8e8e8;}
+  td:first-child{text-align:left;}
+  .poly{color:#7ab0e0;}
+  .exp{color:#e0b070;}
+  .actual{color:black;font-weight:bold;}
+  .divider{width:100%;height:0.5px;background:#1e1e1e;margin:20px 0;}
+  .notes{display:flex;flex-direction:column;gap:7px;}
+  .note{display:flex;gap:10px;font-size:11px;color:black;font-family:'Courier New',monospace;line-height:1.5;}
+  .note-num{color:#3a3a3a;flex-shrink:0;}
+  .note em{color:black;font-style:normal;}
+  .source{margin-top:20px;padding-top:16px;border-top:0.5px solid #1e1e1e;font-size:10px;color:#3a3a3a;font-family:'Courier New',monospace;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <h1>Military spending forecast -- 2026, 2028, 2030</h1>
+    <p>Historical: SIPRI 1988-2025 (solid) -- Forecast: Polynomial Regression (dashed) vs Exponential Smoothing (dotted)</p>
+  </div>
+
+  <div class="controls">
+    <span style="font-size:11px;color:black;font-family:'Courier New',monospace;align-self:center;">Show model:</span>
+    <button class="btn active" id="btnBoth" onclick="setModel('both')">Both models</button>
+    <button class="btn" id="btnPoly" onclick="setModel('poly')">Polynomial only</button>
+    <button class="btn" id="btnExp"  onclick="setModel('exp')">Exp. Smoothing only</button>
+  </div>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="chart-wrap">
+    <canvas id="forecastChart" role="img" aria-label="Line chart of military spending history and forecast for 6 countries.">Military spending forecast.</canvas>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Country</th>
+          <th>2025 actual</th>
+          <th class="poly">2026 Poly</th><th class="exp">2026 Exp</th>
+          <th class="poly">2028 Poly</th><th class="exp">2028 Exp</th>
+          <th class="poly">2030 Poly</th><th class="exp">2030 Exp</th>
+        </tr>
+      </thead>
+      <tbody id="forecastTable"></tbody>
+    </table>
+  </div>
+
+  <div class="divider"></div>
+  <div class="notes">
+    <div class="note"><span class="note-num">1</span><span><em>Solid lines</em> = SIPRI historical data. <em>Dashed</em> = Polynomial Regression. <em>Dotted</em> = Exponential Smoothing. Hover for values.</span></div>
+    <div class="note"><span class="note-num">2</span><span>Large gap between models = high uncertainty. China ($121B gap by 2030) and US ($72B gap) carry the most uncertainty.</span></div>
+    <div class="note"><span class="note-num">3</span><span><em>Germany and Russia projections require caution:</em> Germany's 2024-2025 NATO surge may not be captured by models trained on pre-surge data. Russia's war spending may not be sustainable.</span></div>
+  </div>
+  <div class="source">Models: Polynomial Regression (sklearn, degree 2) and Exponential Smoothing (alpha=0.3, 5-year trend) -- Data: SIPRI 2026 via Our World in Data</div>
+</div>
+
+<script>
+const chartData    = {"United States": {"hist_years": [1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], "hist_vals": [821.4, 814.5, 780.6, 689.5, 726.6, 687.8, 652.0, 609.0, 575.9, 572.9, 560.0, 561.4, 583.1, 587.8, 660.0, 751.2, 818.8, 856.5, 868.8, 892.0, 956.9, 1032.2, 1061.7, 1049.1, 990.8, 914.6, 858.4, 838.9, 836.3, 827.7, 852.6, 901.0, 943.5, 933.3, 922.5, 943.0, 1004.9, 929.2], "last_actual": 929.2, "poly": {"2026": 1007.8, "2028": 1031.7, "2030": 1056.2}, "exp": {"2026": 949.6, "2028": 966.8, "2030": 984.1}}, "China": {"hist_years": [1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], "hist_vals": [19.9, 21.6, 23.0, 28.0, 25.7, 24.8, 25.7, 27.2, 29.1, 31.7, 38.7, 41.9, 49.6, 57.0, 61.7, 68.0, 74.6, 85.9, 94.4, 103.3, 125.4, 131.5, 141.2, 155.7, 168.4, 181.8, 196.1, 207.4, 220.1, 233.0, 244.4, 255.9, 262.6, 274.2, 292.2, 311.9, 335.0], "last_actual": 335.0, "poly": {"2026": 353.5, "2028": 390.3, "2030": 429.1}, "exp": {"2026": 308.4, "2028": 336.5, "2030": 364.5}}, "Russia": {"hist_years": [1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], "hist_vals": [47.5, 41.5, 39.2, 25.8, 24.4, 26.6, 15.8, 17.6, 23.7, 25.6, 28.4, 29.8, 31.1, 35.4, 39.2, 42.6, 46.9, 49.2, 50.2, 53.5, 62.0, 65.0, 69.7, 75.1, 80.5, 65.3, 62.8, 65.6, 67.2, 68.5, 88.7, 109.0, 149.4, 158.2], "last_actual": 158.2, "poly": {"2026": 136.2, "2028": 153.3, "2030": 171.7}, "exp": {"2026": 133.3, "2028": 159.8, "2030": 186.3}}, "India": {"hist_years": [1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], "hist_vals": [21.1, 22.2, 21.9, 20.4, 19.5, 22.0, 22.1, 22.8, 23.2, 25.7, 26.8, 31.1, 32.1, 33.3, 33.2, 33.9, 39.4, 41.9, 42.2, 42.8, 48.5, 57.1, 57.3, 57.9, 57.6, 57.6, 60.4, 61.0, 67.2, 71.9, 74.5, 79.7, 80.2, 79.7, 83.2, 85.2, 85.6, 93.2], "last_actual": 93.2, "poly": {"2026": 97.0, "2028": 103.8, "2030": 110.9}, "exp": {"2026": 87.6, "2028": 92.4, "2030": 97.2}}, "United Kingdom": {"hist_years": [1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], "hist_vals": [74.4, 75.1, 75.2, 76.1, 71.0, 67.8, 65.9, 61.8, 61.2, 59.1, 59.3, 59.0, 60.1, 62.5, 66.2, 71.0, 71.8, 72.5, 72.8, 74.8, 78.1, 79.3, 78.0, 75.4, 73.3, 70.6, 69.3, 66.7, 66.4, 66.6, 67.1, 69.8, 71.0, 72.0, 73.2, 78.2, 89.8, 88.0], "last_actual": 88.0, "poly": {"2026": 82.4, "2028": 85.0, "2030": 87.8}, "exp": {"2026": 83.9, "2028": 89.3, "2030": 94.8}}, "Germany": {"hist_years": [1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], "hist_vals": [67.2, 67.0, 70.6, 65.3, 62.2, 55.9, 52.1, 51.2, 50.2, 48.4, 48.6, 49.5, 48.8, 48.0, 48.1, 47.4, 46.0, 45.3, 44.5, 44.5, 45.6, 47.3, 47.4, 46.5, 47.8, 46.0, 46.1, 46.9, 48.9, 50.3, 51.7, 56.7, 60.4, 59.9, 62.5, 70.2, 86.2, 106.7], "last_actual": 106.7, "poly": {"2026": 86.0, "2028": 94.8, "2030": 104.5}, "exp": {"2026": 86.4, "2028": 98.6, "2030": 110.8}}};
+const countryColors = {"United States": "#808080", "China": "#e05c2a", "Russia": "#3a7abf", "India": "#8050b0", "United Kingdom": "#50a060", "Germany": "#d4a020"};
+const countries = Object.keys(chartData);
+const targetYears = [2026, 2028, 2030];
+let currentModel = 'both';
+let chart;
+
+function buildDatasets() {
+  const datasets = [];
+  countries.forEach(c => {
+    const d = chartData[c];
+    const col = countryColors[c];
+    const histData = d.hist_years.map((y,i) => ({x:y, y:d.hist_vals[i]}));
+    datasets.push({label:c+' (actual)', data:histData, borderColor:col, backgroundColor:'transparent', borderWidth:2, pointRadius:0, tension:0.3});
+    if (currentModel==='both'||currentModel==='poly') {
+      const polyData = targetYears.map(yr => ({x:yr, y:d.poly[yr]}));
+      const bridgePoint = {x: d.hist_years[d.hist_years.length-1], y: d.hist_vals[d.hist_vals.length-1]};
+      datasets.push({label:c+' (poly)', data:[bridgePoint,...polyData], borderColor:col, backgroundColor:'transparent', borderWidth:1.5, borderDash:[6,3], pointRadius:[0,5,5,5], pointBackgroundColor:col, tension:0.2});
+    }
+    if (currentModel==='both'||currentModel==='exp') {
+      const expData = targetYears.map(yr => ({x:yr, y:d.exp[yr]}));
+      const bridgePoint = {x: d.hist_years[d.hist_years.length-1], y: d.hist_vals[d.hist_vals.length-1]};
+      datasets.push({label:c+' (exp)', data:[bridgePoint,...expData], borderColor:col, backgroundColor:'transparent', borderWidth:1.5, borderDash:[2,4], pointRadius:[0,5,5,5], pointBackgroundColor:col, tension:0.2});
+    }
+  });
+  return datasets;
+}
+
+function buildLegend() {
+  const leg = document.getElementById('legend');
+  leg.innerHTML = '';
+  countries.forEach(c => {
+    const col = countryColors[c];
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.innerHTML = '<div class="legend-dot" style="background:'+col+'"></div>'+c;
+    leg.appendChild(item);
+  });
+  const note = document.createElement('div');
+  note.style.cssText = 'width:100%;font-size:10px;color:#3a3a3a;font-family:Courier New,monospace;margin-top:2px;';
+  note.textContent = '-- solid: historical   - - dashed: polynomial   ... dotted: exp. smoothing   dots: forecast points';
+  leg.appendChild(note);
+}
+
+function buildTable() {
+  const tbody = document.getElementById('forecastTable');
+  tbody.innerHTML = '';
+  countries.forEach(c => {
+    const d = chartData[c];
+    const col = countryColors[c];
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td style="color:'+col+'">'+c+'</td>'+
+      '<td class="actual">$'+d.last_actual+'B</td>'+
+      targetYears.map(yr =>
+        '<td class="poly">$'+d.poly[yr]+'B</td><td class="exp">$'+d.exp[yr]+'B</td>'
+      ).join('');
+    tbody.appendChild(tr);
+  });
+}
+
+function setModel(model) {
+  currentModel = model;
+  ['btnBoth','btnPoly','btnExp'].forEach(id => document.getElementById(id).classList.remove('active'));
+  const btnId = model==='both'?'btnBoth':model==='poly'?'btnPoly':'btnExp';
+  document.getElementById(btnId).classList.add('active');
+  chart.data.datasets = buildDatasets();
+  chart.update();
+}
+
+function drawForecastZone() {
+  const ctx2 = chart.ctx;
+  const xScale = chart.scales.x;
+  const x2025 = xScale.getPixelForValue(2025.3);
+  ctx2.save();
+  ctx2.fillStyle = 'rgba(255,255,255,0.02)';
+  ctx2.fillRect(x2025, chart.chartArea.top, chart.chartArea.right-x2025, chart.chartArea.bottom-chart.chartArea.top);
+  ctx2.setLineDash([4,4]);
+  ctx2.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx2.lineWidth = 1;
+  ctx2.beginPath();
+  ctx2.moveTo(x2025, chart.chartArea.top);
+  ctx2.lineTo(x2025, chart.chartArea.bottom);
+  ctx2.stroke();
+  ctx2.setLineDash([]);
+  ctx2.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx2.font = '10px Courier New';
+  ctx2.fillText('forecast zone ->', x2025+8, chart.chartArea.top+14);
+  ctx2.restore();
+}
+
+window.onload = function() {
+  buildLegend();
+  buildTable();
+  chart = new Chart(document.getElementById('forecastChart'), {
+    type:'line',
+    data:{datasets:buildDatasets()},
+    options:{
+      responsive:true, maintainAspectRatio:false, parsing:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          mode:'nearest', intersect:true,
+          callbacks:{
+            title:ctx => 'Year: '+ctx[0].raw.x,
+            label:ctx => {
+              const parts = ctx.dataset.label.split(' (');
+              const country = parts[0];
+              const type = (parts[1]||'actual)').replace(')','');
+              const typeLabel = type==='actual'?'actual':type==='poly'?'Poly forecast':'Exp forecast';
+              return country+' ['+typeLabel+']: $'+ctx.raw.y.toFixed(1)+'B';
+            }
+          },
+          backgroundColor:'rgba(10,10,10,0.95)',titleColor:'#e8e4dc',bodyColor:'#888',
+          padding:12,displayColors:false,borderColor:'#2a2a2a',borderWidth:1,
+        }
+      },
+      scales:{
+        x:{type:'linear',min:1995,max:2031,
+           grid:{color:'rgba(255,255,255,0.04)'},
+           ticks:{color:'#444',font:{size:10,family:'Courier New'},stepSize:5,callback:v=>Number.isInteger(v)?v:''}},
+        y:{grid:{color:'rgba(255,255,255,0.04)'},
+           ticks:{color:'#444',font:{size:11,family:'Courier New'},callback:v=>'$'+v+'B'},
+           title:{display:true,text:'Billion USD (constant 2024)',color:'#444',font:{size:11,family:'Courier New'}}}
+      },
+      animation:{onComplete:()=>drawForecastZone()},
+    }
+  });
+};
+</script>
+</body>
+</html>

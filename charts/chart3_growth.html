@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Military Spending — Fastest Growth Rate per Year</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#0d0d0d;font-family:Georgia,serif;color:#E8E4DC;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 24px;}
+  .card{background:white;border:0.5px solid #2a2a2a;border-radius:12px;padding:36px 40px;width:100%;max-width:860px;}
+  .header{margin-bottom:20px;}
+  .header h1{font-size:18px;font-weight:normal;letter-spacing:0.04em;color:black;margin-bottom:6px;}
+  .header p{font-size:12px;color:black;font-family:'Courier New',monospace;}
+  .legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;font-size:11px;color:black;font-family:'Courier New',monospace;}
+  .legend-item{display:flex;align-items:center;gap:5px;}
+  .legend-swatch{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
+  .chart-wrap{position:relative;width:100%;height:320px;}
+  .notes{margin-top:20px;display:flex;flex-direction:column;gap:7px;}
+  .note{display:flex;gap:10px;font-size:11px;color:black;font-family:'Courier New',monospace;line-height:1.5;}
+  .note-num{color:#3a3a3a;flex-shrink:0;}
+  .note em{color:black;font-style:normal;}
+  .source{margin-top:24px;padding-top:16px;border-top:0.5px solid #1e1e1e;font-size:10px;color:#3a3a3a;font-family:'Courier New',monospace;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <h1>Fastest military spending growth rate per year</h1>
+    <p>SIPRI Military Expenditure Database · constant 2024 USD · 1989–2025</p>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch" style="background:#808080;"></div>USA</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#e05c2a;"></div>China</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#3a7abf;"></div>Russia</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#8050b0;"></div>India</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#d4a020;"></div>Saudi Arabia</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#50a060;"></div>Others</div>
+  </div>
+  <div class="chart-wrap">
+    <canvas id="growthChart" role="img" aria-label="Bar chart of fastest military spending growth rate per year 1989-2025.">Fastest growing country growth rate per year 1989-2025.</canvas>
+  </div>
+  <div class="notes">
+    <div class="note"><span class="note-num">①</span><span><em>United States was the #1 spender every single year from 1988 to 2025.</em> Bars show which country had the fastest growth rate that year, not the largest budget.</span></div>
+    <div class="note"><span class="note-num">②</span><span>Hover over each bar for country name, growth rate, absolute increase, and US spending that year.</span></div>
+  </div>
+  <div class="source">Data: Stockholm International Peace Research Institute (SIPRI), 2026, via Our World in Data</div>
+</div>
+<script>
+const rows=[
+  {year:1989,fastest:'Japan',pct:4.3,growthB:1.32,topSpender:'United States',topB:814.46},
+  {year:1990,fastest:'Saudi Arabia',pct:25.7,growthB:6.50,topSpender:'United States',topB:780.58},
+  {year:1991,fastest:'China',pct:6.3,growthB:1.36,topSpender:'United States',topB:689.54},
+  {year:1992,fastest:'United States',pct:5.4,growthB:37.10,topSpender:'United States',topB:726.64},
+  {year:1993,fastest:'India',pct:12.9,growthB:2.52,topSpender:'United States',topB:687.75},
+  {year:1994,fastest:'France',pct:0.5,growthB:0.29,topSpender:'United States',topB:652.00},
+  {year:1995,fastest:'China',pct:3.9,growthB:0.96,topSpender:'United States',topB:609.03},
+  {year:1996,fastest:'Italy',pct:10.2,growthB:2.89,topSpender:'United States',topB:575.90},
+  {year:1997,fastest:'Saudi Arabia',pct:35.8,growthB:8.22,topSpender:'United States',topB:572.92},
+  {year:1998,fastest:'Saudi Arabia',pct:15.5,growthB:4.84,topSpender:'United States',topB:559.98},
+  {year:1999,fastest:'China',pct:21.9,growthB:6.95,topSpender:'United States',topB:561.36},
+  {year:2000,fastest:'United States',pct:3.9,growthB:21.73,topSpender:'United States',topB:583.09},
+  {year:2001,fastest:'China',pct:18.6,growthB:7.77,topSpender:'United States',topB:587.82},
+  {year:2002,fastest:'United States',pct:12.3,growthB:72.19,topSpender:'United States',topB:660.01},
+  {year:2003,fastest:'United States',pct:13.8,growthB:91.19,topSpender:'United States',topB:751.20},
+  {year:2004,fastest:'United States',pct:9.0,growthB:67.55,topSpender:'United States',topB:818.75},
+  {year:2005,fastest:'United States',pct:4.6,growthB:37.71,topSpender:'United States',topB:856.46},
+  {year:2006,fastest:'United States',pct:1.4,growthB:12.34,topSpender:'United States',topB:868.80},
+  {year:2007,fastest:'United States',pct:2.7,growthB:23.19,topSpender:'United States',topB:891.99},
+  {year:2008,fastest:'United States',pct:7.3,growthB:64.88,topSpender:'United States',topB:956.87},
+  {year:2009,fastest:'United States',pct:7.9,growthB:75.30,topSpender:'United States',topB:1032.17},
+  {year:2010,fastest:'United States',pct:2.9,growthB:29.50,topSpender:'United States',topB:1061.67},
+  {year:2011,fastest:'China',pct:7.4,growthB:9.67,topSpender:'United States',topB:1049.10},
+  {year:2012,fastest:'China',pct:10.3,growthB:14.50,topSpender:'United States',topB:990.83},
+  {year:2013,fastest:'China',pct:8.1,growthB:12.66,topSpender:'United States',topB:914.62},
+  {year:2014,fastest:'Saudi Arabia',pct:17.9,growthB:14.42,topSpender:'United States',topB:858.36},
+  {year:2015,fastest:'China',pct:7.9,growthB:14.28,topSpender:'United States',topB:838.87},
+  {year:2016,fastest:'China',pct:5.8,growthB:11.29,topSpender:'United States',topB:836.29},
+  {year:2017,fastest:'China',pct:6.1,growthB:12.75,topSpender:'United States',topB:827.67},
+  {year:2018,fastest:'United States',pct:3.0,growthB:24.92,topSpender:'United States',topB:852.59},
+  {year:2019,fastest:'United States',pct:5.7,growthB:48.44,topSpender:'United States',topB:901.03},
+  {year:2020,fastest:'United States',pct:4.7,growthB:42.42,topSpender:'United States',topB:943.45},
+  {year:2021,fastest:'China',pct:2.6,growthB:6.67,topSpender:'United States',topB:933.33},
+  {year:2022,fastest:'Russia',pct:29.5,growthB:20.18,topSpender:'United States',topB:922.55},
+  {year:2023,fastest:'United States',pct:2.2,growthB:20.48,topSpender:'United States',topB:943.03},
+  {year:2024,fastest:'United States',pct:6.6,growthB:61.87,topSpender:'United States',topB:1004.90},
+  {year:2025,fastest:'China',pct:7.4,growthB:23.12,topSpender:'United States',topB:929.16},
+];
+const colorMap={'United States':'#808080','China':'#e05c2a','Russia':'#3a7abf','India':'#8050b0','Saudi Arabia':'#d4a020'};
+const getColor=c=>colorMap[c]||'#50a060';
+const annotations={1997:'Yemen — oil revenue surge',1999:'China WTO accession',2002:'9/11 aftermath',2009:'Afghanistan surge',2022:'Russia invades Ukraine'};
+new Chart(document.getElementById('growthChart'),{
+  type:'bar',
+  data:{labels:rows.map(r=>r.year),datasets:[{data:rows.map(r=>r.pct),backgroundColor:rows.map(r=>getColor(r.fastest)),borderRadius:3,borderSkipped:false}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:ctx=>{const r=rows[ctx[0].dataIndex];return r.year+(annotations[r.year]?'  —  '+annotations[r.year]:'');},label:ctx=>{const r=rows[ctx.dataIndex];return['Fastest grower:     '+r.fastest,'Growth rate:        +'+r.pct+'%','Absolute increase:  +$'+r.growthB.toFixed(1)+'B','──────────────────────────','Top spender:        '+r.topSpender,'Top spending:       $'+r.topB.toFixed(1)+'B'];}},backgroundColor:'rgba(10,10,10,0.95)',titleColor:'#ffffff',bodyColor:'#ffffff',padding:12,displayColors:false,borderColor:'#2a2a2a',borderWidth:1}},scales:{x:{grid:{display:false},ticks:{color:'#444',font:{size:10,family:'Courier New'},autoSkip:false,maxRotation:45,callback:(v,i)=>rows[i].year}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#444',font:{size:11,family:'Courier New'},callback:v=>'+'+v+'%'},title:{display:true,text:'Fastest growth rate that year (%)',color:'#444',font:{size:11,family:'Courier New'}}}}}
+});
+</script>
+</body>
+</html>

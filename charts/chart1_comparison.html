@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Military Spending — Change by Country</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0d0d0d; font-family:Georgia,serif; color:#E8E4DC; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px 24px; }
+  .card { background:white; border:0.5px solid #2a2a2a; border-radius:12px; padding:36px 40px; width:100%; max-width:780px; }
+  .header { margin-bottom:28px; }
+  .header h1 { font-size:18px; font-weight:normal; letter-spacing:0.04em; color:black; margin-bottom:6px; }
+  .header p { font-size:12px; color:black; font-family:'Courier New',monospace; }
+  .chart-wrap { position:relative; width:100%; height:480px; }
+  .notes { margin-top:20px; display:flex; flex-direction:column; gap:7px; }
+  .note { display:flex; gap:10px; font-size:11px; color:black; font-family:'Courier New',monospace; line-height:1.5; }
+  .note-num { color:#3a3a3a; flex-shrink:0; }
+  .note em { color:black; font-style:normal; }
+  .source { margin-top:24px; padding-top:16px; border-top:0.5px solid #1e1e1e; font-size:10px; color:#3a3a3a; font-family:'Courier New',monospace; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <h1>Military spending — change from start to end year</h1>
+    <p>SIPRI Military Expenditure Database · constant 2024 USD · 1988–2025</p>
+  </div>
+  <div class="chart-wrap">
+    <canvas id="compChart" role="img" aria-label="Diverging horizontal bar chart of military spending percentage change by country.">Military spending change by country.</canvas>
+  </div>
+  <div class="notes">
+    <div class="note"><span class="note-num">①</span><span>Hover over each bar for start year, end year, spending values, and absolute change.</span></div>
+    <div class="note"><span class="note-num">②</span><span><em>USSR: 1988–1990 only</em> (dissolved 1991). <em>Russia: 1992–2025</em> (from independence). <em>China: 1989–2025</em> (earliest available data).</span></div>
+  </div>
+  <div class="source">Data: Stockholm International Peace Research Institute (SIPRI), 2026, via Our World in Data</div>
+</div>
+<script>
+const data = [
+  {country:'China',startYear:1989,startB:19.91,endYear:2025,endB:335.02,pct:1582.7},
+  {country:'India',startYear:1988,startB:21.06,endYear:2025,endB:93.25,pct:342.8},
+  {country:'Russia',startYear:1992,startB:47.46,endYear:2025,endB:158.24,pct:233.4},
+  {country:'Saudi Arabia',startYear:1988,startB:26.80,endYear:2025,endB:81.47,pct:204.0},
+  {country:'Japan',startYear:1988,startB:30.47,endYear:2025,endB:59.49,pct:95.2},
+  {country:'Germany',startYear:1988,startB:67.19,endYear:2025,endB:106.73,pct:58.8},
+  {country:'Italy',startYear:1988,startB:33.22,endYear:2025,endB:45.44,pct:36.8},
+  {country:'United Kingdom',startYear:1988,startB:74.43,endYear:2025,endB:87.98,pct:18.2},
+  {country:'France',startYear:1988,startB:56.68,endYear:2025,endB:64.52,pct:13.8},
+  {country:'United States',startYear:1988,startB:821.40,endYear:2025,endB:929.16,pct:13.1},
+  {country:'USSR',startYear:1988,startB:282.92,endYear:1990,endB:221.93,pct:-21.6},
+];
+new Chart(document.getElementById('compChart'),{
+  type:'bar',
+  data:{labels:data.map(d=>d.country),datasets:[{data:data.map(d=>d.pct),backgroundColor:data.map(d=>d.pct<0?'#7a2020':'#2a5a8a'),hoverBackgroundColor:data.map(d=>d.pct<0?'#c04040':'#3a7abf'),borderRadius:3,borderSkipped:false}]},
+  options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:ctx=>data[ctx[0].dataIndex].country,label:ctx=>{const d=data[ctx.dataIndex];const changeB=(d.endB-d.startB).toFixed(1);const sign=d.endB>=d.startB?'+':'';const pctStr=(d.pct>=0?'+':'')+d.pct.toFixed(1)+'%';return['Start:   '+d.startYear+'  →  $'+d.startB.toFixed(1)+'B','End:     '+d.endYear+'  →  $'+d.endB.toFixed(1)+'B','──────────────────────','Change:  '+sign+'$'+changeB+'B  ('+pctStr+')'];}},backgroundColor:'rgba(10,10,10,0.95)',titleColor:'#ffffff',bodyColor:'#ffffff',padding:12,displayColors:false,borderColor:'#2a2a2a',borderWidth:1}},scales:{x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#444',font:{size:11,family:'Courier New'},callback:v=>(v>=0?'+':'')+v+'%'},title:{display:true,text:'Change in military spending from start to end year (%)',color:'#444',font:{size:11,family:'Courier New'}}},y:{grid:{display:false},ticks:{color:'#888',font:{size:12,family:'Georgia'}}}}}
+});
+</script>
+</body>
+</html>

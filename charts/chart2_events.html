@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Military Spending — Ranking Overtake Events</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#0d0d0d;font-family:Georgia,serif;color:#E8E4DC;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 24px;}
+  .card{background:white;border:0.5px solid #2a2a2a;border-radius:12px;padding:36px 40px;width:100%;max-width:820px;}
+  .header{margin-bottom:20px;}
+  .header h1{font-size:18px;font-weight:normal;letter-spacing:0.04em;color:black;margin-bottom:6px;}
+  .header p{font-size:12px;color:black;font-family:'Courier New',monospace;}
+  .legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;font-size:11px;color:black;font-family:'Courier New',monospace;}
+  .legend-item{display:flex;align-items:center;gap:5px;}
+  .legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .chart-wrap{position:relative;width:100%;height:340px;}
+  .notes{margin-top:20px;display:flex;flex-direction:column;gap:7px;}
+  .note{display:flex;gap:10px;font-size:11px;color:black;font-family:'Courier New',monospace;line-height:1.5;}
+  .note-num{color:#3a3a3a;flex-shrink:0;}
+  .source{margin-top:24px;padding-top:16px;border-top:0.5px solid #1e1e1e;font-size:10px;color:#3a3a3a;font-family:'Courier New',monospace;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <h1>Ranking overtake events — top 7 military spenders</h1>
+    <p>SIPRI Military Expenditure Database · constant 2024 USD · 1988–2025</p>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#e05c2a;"></div>China</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#3a7abf;"></div>Russia</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#8050b0;"></div>India</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#d4a020;"></div>Saudi Arabia</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#50a060;"></div>Germany / UK</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#555;"></div>Others</div>
+  </div>
+  <div class="chart-wrap">
+    <canvas id="eventsChart" role="img" aria-label="Scatter plot of 33 military spending ranking overtake events 1988-2025.">33 ranking overtake events plotted by year and rank achieved.</canvas>
+  </div>
+  <div class="notes">
+    <div class="note"><span class="note-num">①</span><span>Each dot = one overtake event. Y-axis = rank achieved after overtaking. Hover for year, countries involved, spending values, and gap.</span></div>
+    <div class="note"><span class="note-num">②</span><span>Clustered years (2017, 2024) indicate periods of intense reshuffling in global military rankings.</span></div>
+  </div>
+  <div class="source">Data: Stockholm International Peace Research Institute (SIPRI), 2026, via Our World in Data</div>
+</div>
+<script>
+const events=[
+  {year:1990,surpasser:'Japan',surpassed:'Italy',rank:6,surpasserB:33.35,surpassedB:32.21,gapB:1.14},
+  {year:1994,surpasser:'France',surpassed:'Germany',rank:3,surpasserB:55.35,surpassedB:52.11,gapB:3.24},
+  {year:1995,surpasser:'Italy',surpassed:'Russia',rank:6,surpasserB:28.41,surpassedB:25.81,gapB:2.60},
+  {year:1995,surpasser:'Japan',surpassed:'Russia',rank:5,surpasserB:35.12,surpassedB:25.81,gapB:9.31},
+  {year:1998,surpasser:'Saudi Arabia',surpassed:'Italy',rank:6,surpasserB:36.02,surpassedB:33.91,gapB:2.11},
+  {year:2000,surpasser:'Italy',surpassed:'Japan',rank:6,surpasserB:37.58,surpassedB:36.11,gapB:1.47},
+  {year:2001,surpasser:'China',surpassed:'Germany',rank:4,surpasserB:49.63,surpassedB:47.96,gapB:1.67},
+  {year:2002,surpasser:'China',surpassed:'France',rank:3,surpasserB:57.01,surpassedB:50.89,gapB:6.12},
+  {year:2005,surpasser:'China',surpassed:'UK',rank:2,surpasserB:74.62,surpassedB:72.50,gapB:2.12},
+  {year:2006,surpasser:'Saudi Arabia',surpassed:'Germany',rank:5,surpasserB:50.79,surpassedB:44.46,gapB:6.33},
+  {year:2007,surpasser:'Saudi Arabia',surpassed:'France',rank:4,surpasserB:58.50,surpassedB:52.98,gapB:5.52},
+  {year:2009,surpasser:'India',surpassed:'France',rank:5,surpasserB:57.10,surpassedB:56.48,gapB:0.62},
+  {year:2011,surpasser:'Russia',surpassed:'France',rank:6,surpasserB:53.53,surpassedB:52.21,gapB:1.32},
+  {year:2012,surpasser:'Russia',surpassed:'India',rank:5,surpasserB:62.02,surpassedB:57.56,gapB:4.46},
+  {year:2013,surpasser:'Saudi Arabia',surpassed:'UK',rank:3,surpasserB:80.73,surpassedB:70.60,gapB:10.13},
+  {year:2014,surpasser:'Russia',surpassed:'UK',rank:4,surpasserB:69.71,surpassedB:69.34,gapB:0.37},
+  {year:2016,surpasser:'India',surpassed:'UK',rank:5,surpasserB:67.20,surpassedB:66.44,gapB:0.76},
+  {year:2016,surpasser:'Russia',surpassed:'Saudi Arabia',rank:3,surpasserB:80.55,surpassedB:72.62,gapB:7.93},
+  {year:2017,surpasser:'India',surpassed:'Russia',rank:4,surpasserB:71.94,surpassedB:65.27,gapB:6.67},
+  {year:2017,surpasser:'Saudi Arabia',surpassed:'Russia',rank:3,surpasserB:80.97,surpassedB:65.27,gapB:15.70},
+  {year:2017,surpasser:'UK',surpassed:'Russia',rank:5,surpasserB:66.56,surpassedB:65.27,gapB:1.29},
+  {year:2019,surpasser:'India',surpassed:'Saudi Arabia',rank:3,surpasserB:79.73,surpassedB:74.25,gapB:5.48},
+  {year:2020,surpasser:'UK',surpassed:'Saudi Arabia',rank:4,surpasserB:70.96,surpassedB:70.95,gapB:0.01},
+  {year:2021,surpasser:'Russia',surpassed:'Saudi Arabia',rank:5,surpasserB:68.50,surpassedB:67.38,gapB:1.12},
+  {year:2022,surpasser:'Russia',surpassed:'India',rank:3,surpasserB:88.68,surpassedB:83.22,gapB:5.46},
+  {year:2022,surpasser:'Russia',surpassed:'UK',rank:3,surpasserB:88.68,surpassedB:73.19,gapB:15.49},
+  {year:2022,surpasser:'Saudi Arabia',surpassed:'UK',rank:5,surpasserB:73.80,surpassedB:73.19,gapB:0.61},
+  {year:2024,surpasser:'Germany',surpassed:'India',rank:5,surpasserB:86.15,surpassedB:85.60,gapB:0.55},
+  {year:2024,surpasser:'Germany',surpassed:'Saudi Arabia',rank:5,surpasserB:86.15,surpassedB:80.33,gapB:5.82},
+  {year:2024,surpasser:'UK',surpassed:'India',rank:4,surpasserB:89.81,surpassedB:85.60,gapB:4.21},
+  {year:2024,surpasser:'UK',surpassed:'Saudi Arabia',rank:4,surpasserB:89.81,surpassedB:80.33,gapB:9.48},
+  {year:2025,surpasser:'Germany',surpassed:'UK',rank:4,surpasserB:106.73,surpassedB:87.98,gapB:18.75},
+  {year:2025,surpasser:'India',surpassed:'UK',rank:5,surpasserB:93.25,surpassedB:87.98,gapB:5.27},
+];
+const colorMap={'China':'#e05c2a','Russia':'#3a7abf','India':'#8050b0','Saudi Arabia':'#d4a020','Germany':'#50a060','UK':'#50a060'};
+const getColor=s=>colorMap[s]||'#555';
+const jitter={};
+events.forEach(e=>{const key=e.year+'-'+e.rank;jitter[key]=(jitter[key]||0);e._jitter=jitter[key]*0.18;jitter[key]++;});
+new Chart(document.getElementById('eventsChart'),{
+  type:'scatter',
+  data:{datasets:[{data:events.map(e=>({x:e.year,y:e.rank+e._jitter})),backgroundColor:events.map(e=>getColor(e.surpasser)),pointRadius:9,pointHoverRadius:12}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:ctx=>{const e=events[ctx[0].dataIndex];return'In '+e.year+':  '+e.surpasser+' overtook '+e.surpassed;},label:ctx=>{const e=events[ctx.dataIndex];return['New rank:        #'+e.rank,e.surpasser+':  $'+e.surpasserB.toFixed(1)+'B',e.surpassed+':  $'+e.surpassedB.toFixed(1)+'B','Spending gap:    $'+e.gapB.toFixed(2)+'B'];}},backgroundColor:'rgba(10,10,10,0.95)',titleColor:'#ffffff',bodyColor:'#ffffff',padding:12,displayColors:false,borderColor:'#2a2a2a',borderWidth:1}},scales:{x:{min:1988,max:2026,grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#444',font:{size:10,family:'Courier New'},stepSize:1,autoSkip:false,maxRotation:45,callback:v=>Number.isInteger(v)?v:''}},y:{reverse:true,min:1.5,max:7.5,grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#666',font:{size:11,family:'Courier New'},stepSize:1,callback:v=>Number.isInteger(v)?'#'+v:''},title:{display:true,text:'Rank achieved',color:'#444',font:{size:11,family:'Courier New'}}}}}
+});
+</script>
+</body>
+</html>
