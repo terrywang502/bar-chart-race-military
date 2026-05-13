@@ -10,7 +10,7 @@ A data analysis and visualization project covering global military expenditure f
 
 *Which country has the most military spending? (1988–2025)*
 
-![Military Spending Bar Chart Race](military_spending_demo.gif)
+![Military Spending Bar Chart Race](military_spending.gif)
 
 The video animates the rise and fall of global military powers over 37 years —
 including the collapse of the USSR, China's steady climb to #2, and Russia's dramatic resurgence.
