@@ -48,8 +48,11 @@ jobs:
                   return hashlib.md5(f.read()).hexdigest()
 
           def remote_hash(url):
-              with urllib.request.urlopen(url) as r:
-                  return hashlib.md5(r.read()).hexdigest()
+            req = urllib.request.Request(url, headers={
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+            })
+            with urllib.request.urlopen(req) as r:
+               return hashlib.md5(r.read()).hexdigest()
 
           local_h  = file_hash(LOCAL)
           remote_h = remote_hash(URL)
