@@ -1,0 +1,136 @@
+name: Auto Update & Generate Script
+
+on:
+  # Run every year on May 1st (SIPRI typically releases in April)
+  schedule:
+    - cron: '0 9 1 5 *'
+
+  # Allow manual trigger from GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  check-and-update:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      # ── 1. Checkout repo ────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Set up Python ─────────────────────────────────────────────────
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # ── 3. Install dependencies ──────────────────────────────────────────
+      - name: Install dependencies
+        run: |
+          pip install pandas numpy scikit-learn requests
+
+      # ── 4. Check if SIPRI data has been updated ──────────────────────────
+      - name: Check for data update
+        id: check_update
+        run: |
+          python - <<'EOF'
+          import hashlib, os, urllib.request
+
+          URL = "https://ourworldindata.org/grapher/military-spending-sipri.csv?v=1&csvType=full&useColumnShortNames=false"
+          LOCAL = "data/military-spending-sipri.csv"
+
+          def file_hash(path):
+              if not os.path.exists(path):
+                  return ""
+              with open(path, "rb") as f:
+                  return hashlib.md5(f.read()).hexdigest()
+
+          def remote_hash(url):
+              with urllib.request.urlopen(url) as r:
+                  return hashlib.md5(r.read()).hexdigest()
+
+          local_h  = file_hash(LOCAL)
+          remote_h = remote_hash(URL)
+
+          if local_h != remote_h:
+              print("DATA_UPDATED=true")
+              with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+                  f.write("data_updated=true\n")
+          else:
+              print("DATA_UPDATED=false")
+              with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+                  f.write("data_updated=false\n")
+          EOF
+
+      # ── 5. Download new data (only if updated) ───────────────────────────
+      - name: Download updated SIPRI data
+        if: steps.check_update.outputs.data_updated == 'true'
+        run: |
+          curl -L \
+            "https://ourworldindata.org/grapher/military-spending-sipri.csv?v=1&csvType=full&useColumnShortNames=false" \
+            -o data/military-spending-sipri.csv
+          echo "✅ New data downloaded"
+
+      # ── 6. Re-run analysis scripts ───────────────────────────────────────
+      - name: Re-run analysis
+        if: steps.check_update.outputs.data_updated == 'true'
+        run: |
+          python military_spending_analysis_v3.py
+          echo "✅ Analysis complete"
+
+      # ── 7. Generate video script via Claude API ──────────────────────────
+      - name: Generate video script
+        if: steps.check_update.outputs.data_updated == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python generate_script.py
+          echo "✅ Script generated"
+
+      # ── 8. Commit updated files to repo ─────────────────────────────────
+      - name: Commit and push changes
+        if: steps.check_update.outputs.data_updated == 'true'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/military-spending-sipri.csv \
+                  bar_chart_race_data.csv \
+                  events_table.csv \
+                  growth_summary.csv \
+                  comparison_table.csv \
+                  generated_script.md
+          git commit -m "Auto update: SIPRI data refresh $(date +'%Y-%m-%d')"
+          git push
+          echo "✅ Changes pushed to GitHub"
+
+      # ── 9. Send email notification ───────────────────────────────────────
+      - name: Send email notification
+        if: steps.check_update.outputs.data_updated == 'true'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.NOTIFY_EMAIL }}
+          password: ${{ secrets.GMAIL_APP_PASSWORD }}
+          to: ${{ secrets.NOTIFY_EMAIL }}
+          from: GitHub Actions <${{ secrets.NOTIFY_EMAIL }}>
+          subject: "[bar-chart-race-military] data updated and script generated"
+          body: |
+            SIPRI data has been updated and the script has been generated.
+            The automation process has been completed with the following actions:
+            - Download the latest SIPRI data
+            - Re-run the analysis script (military_spending_analysis_v3.py)
+            - Call the Claude API to generate the video script
+
+            Please check the repository for the updated script:
+            https://github.com/terrywang502/bar-chart-race-military/blob/main/generated_script.md
+            Please review the script and make any necessary changes.
+
+      # ── 10. No update found ──────────────────────────────────────────────
+      - name: No update found
+        if: steps.check_update.outputs.data_updated == 'false'
+        run: |
+          echo "ℹ️ No data update detected. Workflow complete."
