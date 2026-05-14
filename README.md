@@ -2,7 +2,7 @@
 
 **Which countries are spending the most on their military — and who is catching up?**
 
-A data analysis and visualization project covering global military expenditure from 1988 to 2025, with forecasts to 2030. Built with Python and Chart.js.
+A data analysis and visualization project covering global military expenditure from 1988 to 2025, with forecasts to 2030 and a fully automated update pipeline. Built with Python, Chart.js, GitHub Actions, and Claude API.
 
 ---
 
@@ -121,23 +121,85 @@ significantly exceed both projections.
 
 ---
 
+## Automated Pipeline
+
+This project includes a fully automated update workflow powered by GitHub Actions and Claude API.
+
+### How it works
+
+```
+Every May 1st (annual trigger)
+        ↓
+Check if SIPRI data has been updated
+(MD5 hash comparison of remote vs local file)
+        ↓
+  No update → stop, log result
+        ↓
+  Update detected:
+        ↓
+Download new SIPRI data
+        ↓
+Re-run analysis scripts (CSV outputs)
+        ↓
+Call Claude API → generate English video script draft
+        ↓
+Auto-commit all updated files to GitHub
+        ↓
+Send email notification with script draft link
+```
+
+### What gets automated
+
+| Step | Tool |
+|------|------|
+| Data update detection | Python (MD5 hash comparison) |
+| Data download | GitHub Actions + curl |
+| Analysis re-run | `military_spending_analysis_v3.py` |
+| Script generation | Claude API (`claude-sonnet-4-20250514`) |
+| Version control | Git auto-commit |
+| Notification | Gmail via GitHub Actions |
+
+### Manual trigger
+
+The workflow can also be triggered manually at any time:
+
+1. Go to the **Actions** tab in this repository
+2. Select **"Auto Update & Generate Script"**
+3. Click **"Run workflow"**
+
+This is useful for testing or generating a fresh script draft on demand.
+
+### Output
+
+When new data is detected, the pipeline generates `generated_script.md` —
+an AI-drafted English video script based on the latest analysis results,
+ready for human review before use.
+
+---
+
 ## Repository Structure
 
 ```
 bar-chart-race-military/
+├── .github/
+│   └── workflows/
+│       └── auto_update.yml            # GitHub Actions pipeline
 ├── data/
-│   └── military-spending-sipri.csv        # Raw SIPRI data via Our World in Data
+│   └── military-spending-sipri.csv    # Raw SIPRI data via Our World in Data
 ├── charts/
-│   ├── chart1_comparison.html             # Interactive: spending change by country
-│   ├── chart2_events.html                 # Interactive: ranking overtake events
-│   ├── chart3_growth.html                 # Interactive: fastest growth rate per year
-│   └── chart4_forecast.html              # Interactive: forecast to 2030
-├── military_spending_analysis.ipynb       # Full analysis + chart generation notebook
-├── military_spending_analysis_v3.py       # Data processing + CSV generation script
-├── bar_chart_race_data.csv                # Formatted data for bar chart race video
-├── events_table.csv                       # 33 ranking overtake events
-├── growth_summary.csv                     # Fastest growing country per year
-├── comparison_table.csv                   # Start vs end year comparison
+│   ├── chart1_comparison.html         # Interactive: spending change by country
+│   ├── chart2_events.html             # Interactive: ranking overtake events
+│   ├── chart3_growth.html             # Interactive: fastest growth rate per year
+│   └── chart4_forecast.html           # Interactive: forecast to 2030
+├── military_spending_analysis.ipynb   # Full analysis + chart generation notebook
+├── military_spending_analysis_v3.py   # Data processing + CSV generation script
+├── generate_script.py                 # Claude API script generator
+├── bar_chart_race_data.csv            # Formatted data for bar chart race video
+├── events_table.csv                   # 33 ranking overtake events
+├── growth_summary.csv                 # Fastest growing country per year
+├── comparison_table.csv               # Start vs end year comparison
+├── generated_script.md                # AI-generated video script (auto-updated)
+├── military_spending.gif              # Bar chart race demo video
 └── README.md
 ```
 
@@ -160,7 +222,13 @@ python military_spending_analysis_v3.py
 jupyter notebook military_spending_analysis.ipynb
 ```
 
-**Step 3:** Open any chart directly in your browser
+**Step 3:** Generate a video script draft via Claude API
+```bash
+export ANTHROPIC_API_KEY=your_key_here
+python generate_script.py
+```
+
+**Step 4:** Open any chart directly in your browser
 ```bash
 open charts/chart1_comparison.html
 ```
@@ -175,6 +243,8 @@ open charts/chart1_comparison.html
 | Machine Learning | Scikit-learn (Polynomial Regression, Exponential Smoothing) |
 | Visualization | Chart.js (interactive HTML charts) |
 | Bar Chart Race | Python (Matplotlib, custom vertical format) |
+| Automation | GitHub Actions (scheduled + manual trigger) |
+| AI Integration | Claude API — automated script generation |
 | Environment | Jupyter Notebook |
 
 ---
