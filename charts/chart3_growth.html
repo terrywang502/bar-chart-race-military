@@ -87,7 +87,7 @@ const rows=[
 ];
 const colorMap={'United States':'#808080','China':'#e05c2a','Russia':'#3a7abf','India':'#8050b0','Saudi Arabia':'#d4a020'};
 const getColor=c=>colorMap[c]||'#50a060';
-const annotations={1997:'Yemen — oil revenue surge',1999:'China WTO accession',2002:'9/11 aftermath',2009:'Afghanistan surge',2022:'Russia invades Ukraine'};
+const annotations={1997:'Geopolitical tensions',1999:'China WTO accession',2002:'9/11 aftermath',2009:'Afghanistan surge',2022:'Russia invades Ukraine'};
 new Chart(document.getElementById('growthChart'),{
   type:'bar',
   data:{labels:rows.map(r=>r.year),datasets:[{data:rows.map(r=>r.pct),backgroundColor:rows.map(r=>getColor(r.fastest)),borderRadius:3,borderSkipped:false}]},

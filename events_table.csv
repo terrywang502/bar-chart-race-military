@@ -1,28 +1,58 @@
 year,surpasser,surpassed,surpasser_rank,surpassed_rank,surpasser_spending_B,surpassed_spending_B,gap_B
 1990,Japan,Italy,6,7,33.35,32.21,1.14
+1991,China,India,8,9,23.0,20.41,2.59
 1994,France,Germany,3,4,55.35,52.11,3.24
+1995,China,Saudi Arabia,8,9,25.71,23.0,2.71
 1995,Italy,Russia,6,7,28.41,25.81,2.6
 1995,Japan,Russia,5,7,35.12,25.81,9.31
+1996,China,Russia,7,8,27.23,24.37,2.86
+1996,India,Saudi Arabia,9,10,23.21,22.96,0.25
+1997,Saudi Arabia,China,7,8,31.18,29.05,2.13
+1997,Saudi Arabia,India,7,10,31.18,25.69,5.49
+1997,Saudi Arabia,Russia,7,9,31.18,26.64,4.54
+1998,India,Russia,9,10,26.81,15.84,10.97
 1998,Saudi Arabia,Italy,6,7,36.02,33.91,2.11
+1999,China,Japan,5,6,38.67,35.92,2.75
+1999,China,Saudi Arabia,5,8,38.67,32.06,6.61
+1999,China,Italy,5,7,38.67,35.23,3.44
 2000,Italy,Japan,6,7,37.58,36.11,1.47
 2001,China,Germany,4,5,49.63,47.96,1.67
+2001,Saudi Arabia,Italy,6,7,37.64,36.96,0.68
+2001,Saudi Arabia,Japan,6,8,37.64,36.74,0.9
 2002,China,France,3,4,57.01,50.89,6.12
+2002,India,Saudi Arabia,8,9,33.16,33.04,0.12
+2002,Italy,Saudi Arabia,6,9,37.97,33.04,4.93
+2002,Japan,Saudi Arabia,7,9,36.92,33.04,3.88
+2004,India,Italy,6,7,39.38,38.41,0.97
+2004,India,Japan,6,9,39.38,36.82,2.56
+2004,Saudi Arabia,Japan,8,9,36.92,36.82,0.1
+2005,Saudi Arabia,Italy,6,8,44.58,36.95,7.63
 2005,China,United Kingdom,2,3,74.62,72.5,2.12
+2005,Saudi Arabia,India,6,7,44.58,41.91,2.67
 2006,Saudi Arabia,Germany,5,6,50.79,44.46,6.33
+2006,Russia,Japan,8,9,39.17,36.29,2.88
+2006,Russia,Italy,8,10,39.17,35.76,3.41
 2007,Saudi Arabia,France,4,5,58.5,52.98,5.52
+2008,India,Germany,6,8,48.5,45.58,2.92
+2008,Italy,Japan,9,10,36.17,35.47,0.7
+2008,Russia,Germany,7,8,46.85,45.58,1.27
 2009,India,France,5,6,57.1,56.48,0.62
+2009,Japan,Italy,9,10,36.13,34.99,1.14
 2011,Russia,France,6,7,53.53,52.21,1.32
 2012,Russia,India,5,6,62.02,57.56,4.46
 2013,Saudi Arabia,United Kingdom,3,4,80.73,70.6,10.13
 2014,Russia,United Kingdom,4,5,69.71,69.34,0.37
-2016,Russia,Saudi Arabia,3,4,80.55,72.62,7.93
 2016,India,United Kingdom,5,6,67.2,66.44,0.76
-2017,India,Russia,4,6,71.94,65.27,6.67
+2016,Russia,Saudi Arabia,3,4,80.55,72.62,7.93
 2017,Saudi Arabia,Russia,3,6,80.97,65.27,15.7
 2017,United Kingdom,Russia,5,6,66.56,65.27,1.29
+2017,India,Russia,4,6,71.94,65.27,6.67
+2019,Germany,France,7,8,56.7,56.07,0.63
 2019,India,Saudi Arabia,3,4,79.73,74.25,5.48
 2020,United Kingdom,Saudi Arabia,4,5,70.96,70.95,0.01
+2021,France,Germany,7,8,60.51,59.89,0.62
 2021,Russia,Saudi Arabia,5,6,68.5,67.38,1.12
+2022,Germany,France,7,8,62.5,60.19,2.31
 2022,Russia,India,3,4,88.68,83.22,5.46
 2022,Russia,United Kingdom,3,6,88.68,73.19,15.49
 2022,Saudi Arabia,United Kingdom,5,6,73.8,73.19,0.61

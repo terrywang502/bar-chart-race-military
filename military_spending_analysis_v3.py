@@ -19,7 +19,7 @@ Outputs:
 import pandas as pd
 
 # ── CONFIG ──────────────────────────────────────────────────────────────────
-INPUT_FILE = './data/project_0001_military/military-spending-sipri/military-spending-sipri.csv'
+INPUT_FILE = 'military-spending-sipri.csv'
 START_YEAR = 1988
 END_YEAR   = 2025
 TOP_N      = 7
@@ -79,20 +79,23 @@ print(f"Saved: bar_chart_race_data.csv  ({bcr_df.shape[0]} years x {bcr_df.shape
 # ── STEP 4: RANKING OVERTAKE EVENTS ─────────────────────────────────────────
 print("\nSTEP 4: Detecting ranking overtake events...")
 
+# Compute rank across ALL ever-top7 countries (not just current top 7)
+# This ensures we detect overtakes that happen outside the top 7 threshold,
+# e.g. India moving from rank 8 to rank 6, overtaking Italy and Japan.
 df['rank'] = df.groupby('year')['spending_billions'].rank(
     ascending=False, method='min'
 ).astype(int)
 
-df_topn = df[df['rank'] <= TOP_N].copy()
-years = sorted(df_topn['year'].unique())
+years = sorted(df['year'].unique())
 
 events = []
 for i in range(1, len(years)):
     prev_year = years[i - 1]
     curr_year = years[i]
 
-    prev = df_topn[df_topn['year'] == prev_year].set_index('country')
-    curr = df_topn[df_topn['year'] == curr_year].set_index('country')
+    # Use full df (all ever-top7 countries), not filtered to current top 7
+    prev = df[df['year'] == prev_year].set_index('country')
+    curr = df[df['year'] == curr_year].set_index('country')
 
     for country in curr.index:
         if country not in prev.index:
@@ -100,13 +103,13 @@ for i in range(1, len(years)):
         curr_rank = curr.loc[country, 'rank']
         prev_rank = prev.loc[country, 'rank']
 
-        if curr_rank < prev_rank:
+        if curr_rank < prev_rank:  # rank improved (lower number = higher rank)
             overtaken = [
                 c for c in curr.index
                 if c != country
                 and c in prev.index
-                and prev.loc[c, 'rank'] < prev_rank
-                and curr.loc[c, 'rank'] > curr_rank
+                and prev.loc[c, 'rank'] < prev_rank   # was ahead before
+                and curr.loc[c, 'rank'] > curr_rank    # now behind
             ]
             for victim in overtaken:
                 events.append({
@@ -136,7 +139,7 @@ print("Saved: events_table.csv")
 print("\nSTEP 5: Calculating growth rates...")
 
 growth_rows = []
-for i in range(1, len(years)):
+for i in range(1, len(years)):  # years already defined from Step 4 (full df)
     prev_year = years[i - 1]
     curr_year = years[i]
 
